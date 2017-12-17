@@ -1,5 +1,7 @@
 package com.zheltoukhov.anangram.rest
 
+import com.google.gson.Gson
+import com.zheltoukhov.anangram.search.StreetSearcher
 import spark.Spark.get
 
 /**
@@ -8,7 +10,17 @@ import spark.Spark.get
 object  RestController {
 
     fun start() =
-            get("/hello") { req, res -> "Hello World" }
+            get("/api") { req, res ->
+                res.type("application/json")
+                Gson().toJson(
+                        StreetSearcher()
+                                .streetPattern(req.queryParams("name") ?: null)
+                                .buildingPattern(req.queryParams("building") ?: null)
+                                .lengthPattern(req.queryParams("length") ?: null)
+                                .options(req.queryParams("options") ?: null)
+                                .search()
+                )
+            }
 
 }
 

@@ -2,6 +2,9 @@ package com.zheltoukhov.anangram.search
 
 import com.zheltoukhov.anangram.db.DataProvider
 import com.zheltoukhov.anangram.dto.Street
+import java.util.function.Predicate
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 
 /**
  * Created by Maksim on 16.12.2017.
@@ -12,11 +15,9 @@ abstract class SearchChain {
     abstract fun perform(streets: List<Street>): List<Street>
 }
 
-object InitialSearch: SearchChain() {
-    val streets: List<Street> = DataProvider.findAllStreets()
-    fun go(): List<Street> {
-        return perform(streets)
-    }
+class InitialSearch: SearchChain() {
+    // streets: List<Street> = DataProvider.findAllStreets()
+
     override fun perform(streets: List<Street>): List<Street> {
         return next?.perform(streets) ?: streets
     }
@@ -58,7 +59,6 @@ class LettersSearch(val letters: String?): SearchChain() {
             }
 
             if (searchLetters.isEmpty()) {
-                //println(searchPart)
                 resStreets.add(street.copy(name = resultStreet+suff))
             }
         }
@@ -68,26 +68,68 @@ class LettersSearch(val letters: String?): SearchChain() {
 
 }
 
-class RegexSearch(val regex: String?): SearchChain() {
+class RegexSearch(val regex: String?, val options: String?): SearchChain() {
     override fun perform(streets: List<Street>): List<Street> {
-        if (regex!!.startsWith("[")) {
-
-        } else {
+        if (regex == null || regex.isEmpty())
             return next?.perform(streets) ?: streets
+        var finalRegexp: String = regex.toLowerCase().trim()
+        if (options != null && !options.isEmpty()) {
+            val optArr = options.split(",")
+
+            for (o in optArr) {
+                when (o) {
+                    "start" -> finalRegexp="^"+finalRegexp
+                    "end" -> finalRegexp+="$"
+                    "part" -> finalRegexp=".*$finalRegexp.*"
+                    "ord" -> {
+                        val let = finalRegexp.toCharArray().toList()
+                        finalRegexp=let.joinToString(".*")
+                    }
+                }
+            }
         }
-        return next?.perform(streets) ?: streets
+
+        val x: Predicate<String>
+        try {
+             x = Pattern.compile(finalRegexp).asPredicate()
+        } catch (e: PatternSyntaxException) {
+            return emptyList()
+        }
+
+        val res = streets.filter { s -> x.test(s.value) }.toList()
+        return next?.perform(res) ?: res
     }
 
 }
 
 class BuildingSearch(val building: String?): SearchChain() {
     override fun perform(streets: List<Street>): List<Street> {
-        if (building!=null && !building.isEmpty()) {
-
-        } else {
+        if (building == null || building.isEmpty())
             return next?.perform(streets) ?: streets
+
+        val buildingsMap = DataProvider.findStreetIdByBuildingPart(building)
+        for (s in streets) {
+            s.buildings = buildingsMap.getOrDefault(s.id, emptyList())
         }
-        return next?.perform(streets) ?: streets
+        val res = streets.filter { s -> !s.buildings.isEmpty() }.toList()
+        return next?.perform(res) ?: res
+    }
+}
+
+class LengthPatternSearch(val lengthPattern: String?): SearchChain() {
+    override fun perform(streets: List<Street>): List<Street> {
+        if (lengthPattern == null || lengthPattern.isEmpty())
+            return next?.perform(streets) ?: streets
+        val min = Regex("from\\d+").find(lengthPattern)?.value?.replace("from","") ?: "-"
+        val max = Regex("to\\d+").find(lengthPattern)?.value?.replace("to","") ?: "-"
+        val minLength = try {Integer.parseInt(min)} catch (e: NumberFormatException) {-1}
+        val maxLength = try {Integer.parseInt(max)} catch (e: NumberFormatException) {-1}
+
+        var rule: Predicate<Int> = Predicate { _ -> true }
+        if (minLength>0) rule = rule.and({ l ->minLength<=l })
+        if (maxLength>0) rule = rule.and({ l ->maxLength>=l })
+        val res = streets.filter{ s -> rule.test(s.value.length) }
+        return next?.perform(res) ?: res
     }
 
 }

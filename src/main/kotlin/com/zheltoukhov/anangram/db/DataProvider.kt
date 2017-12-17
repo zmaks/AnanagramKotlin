@@ -13,7 +13,7 @@ object DataProvider {
         val conn = DBConnection.getConnection()
 
         val statement = conn!!.createStatement()
-        val resultset = statement.executeQuery("select * from street")
+        val resultset = statement.executeQuery("select * from street order by name")
 
         val streets = ArrayList<Street>();
         while (resultset!!.next()) {
@@ -25,13 +25,10 @@ object DataProvider {
         return streets
     }
 
-    fun findStreetIdByBuildingPart(part: String,streetIds: List<Long>?): List<Building> {
+    fun findStreetIdByBuildingPart(part: String): Map<Long, List<String>> {
         val conn = DBConnection.getConnection()
 
-        var query = "select street_id, value from building where value like ?"
-        if (streetIds != null && !streetIds.isEmpty()) {
-            query += " and street_id in (${streetIds.joinToString(",")})"
-        }
+        val query = "select street_id, value from building where value like ?"
         val statement = conn!!.prepareStatement(query)
         statement.setString(1,"%$part%")
         val resultSet = statement.executeQuery()
@@ -45,6 +42,6 @@ object DataProvider {
            // println("${resultSet.getString(2)} - ${resultSet.getLong(1)}")
         }
 
-        return buildings
+        return buildings.groupBy({it.streetId},{it.value})
     }
 }
