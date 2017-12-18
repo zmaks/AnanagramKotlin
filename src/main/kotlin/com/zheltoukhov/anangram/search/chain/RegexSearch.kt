@@ -18,7 +18,7 @@ class RegexSearch(val regex: String?, val options: String?): SearchChain() {
                 "start" -> finalRegexp="^"+finalRegexp
                 "end" -> finalRegexp+="$"
                 "part" -> finalRegexp=".*$finalRegexp.*"
-                "ord" -> {
+                "order" -> {
                     val let = finalRegexp.toCharArray().toList()
                     finalRegexp=let.joinToString(".*")
                 }
@@ -42,7 +42,7 @@ class RegexSearch(val regex: String?, val options: String?): SearchChain() {
             "start" -> res = replaceStart(res, part)
             "end" -> res = replaceEnd(res, part)
             "part" -> res = if (isStartWith(name, part)) replaceStart(name,part) else replaceEnd(name,part)
-            "ord" -> res = highlight(res, part.toMutableList())
+            "order" -> res = highlight(res, part.toMutableList())
         }
 
         return res
