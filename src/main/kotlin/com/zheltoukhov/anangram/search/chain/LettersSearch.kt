@@ -19,10 +19,9 @@ class LettersSearch(val letters: String?): SearchChain() {
             if (mass[mass.size-1].contains("Улица")||mass[mass.size-1].contains("Переулок"))
                 suff = mass[mass.size-1]
             var searchPart: String = street.name.replace(suff,"").replace(Regex("\\(.+\\)"), "")
-            val letMass = searchPart.toCharArray().map { c -> Character.toString(c) }.toList()
 
             var searchLetters = letters.toMutableList()
-            val resultStreet = highlight(searchPart, searchLetters)
+            val resultStreet = highlight(searchPart, searchLetters, false)
 
             if (searchLetters.isEmpty()) {
                 resStreets.add(street.copy(name = resultStreet+suff))

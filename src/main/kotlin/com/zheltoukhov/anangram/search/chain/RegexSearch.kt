@@ -42,7 +42,7 @@ class RegexSearch(val regex: String?, val options: String?): SearchChain() {
             "start" -> res = replaceStart(res, part)
             "end" -> res = replaceEnd(res, part)
             "part" -> res = if (isStartWith(name, part)) replaceStart(name,part) else replaceEnd(name,part)
-            "order" -> res = highlight(res, part.toMutableList())
+            "order" -> res = highlight(res, part.toMutableList(), true)
         }
 
         return res
@@ -50,10 +50,10 @@ class RegexSearch(val regex: String?, val options: String?): SearchChain() {
 
     private fun replaceStart(name: String, part: String): String {
         val newPart = part.first().toUpperCase()+part.substring(1)
-        return name.replace(newPart, "<b>$newPart</b>")
+        return name.replaceFirst(newPart, "<b>$newPart</b>")
     }
 
-    private fun replaceEnd(name: String, part: String) = name.replace(part,"<b>$part</b>")
+    private fun replaceEnd(name: String, part: String) = name.replaceFirst(part,"<b>$part</b>")
 
     private fun isStartWith(name: String, part: String): Boolean {
         var res = true
