@@ -1,6 +1,5 @@
 package com.zheltoukhov.anangram.search.chain
 
-import com.zheltoukhov.anangram.db.DataProvider
 import com.zheltoukhov.anangram.dto.Street
 import java.util.function.Predicate
 import java.util.regex.Pattern
@@ -15,17 +14,13 @@ class RegexSearch(val regex: String?, val options: String?): SearchChain() {
             return streets
         var finalRegexp: String = regex.toLowerCase().trim()
         if (options != null && !options.isEmpty()) {
-            val optArr = options.split(",")
-
-            for (o in optArr) {
-                when (o) {
-                    "start" -> finalRegexp="^"+finalRegexp
-                    "end" -> finalRegexp+="$"
-                    "part" -> finalRegexp=".*$finalRegexp.*"
-                    "ord" -> {
-                        val let = finalRegexp.toCharArray().toList()
-                        finalRegexp=let.joinToString(".*")
-                    }
+            when (options) {
+                "start" -> finalRegexp="^"+finalRegexp
+                "end" -> finalRegexp+="$"
+                "part" -> finalRegexp=".*$finalRegexp.*"
+                "ord" -> {
+                    val let = finalRegexp.toCharArray().toList()
+                    finalRegexp=let.joinToString(".*")
                 }
             }
         }
@@ -37,7 +32,35 @@ class RegexSearch(val regex: String?, val options: String?): SearchChain() {
             return emptyList()
         }
 
-        return streets.filter { s -> x.test(s.value) }.toList()
+        return streets.filter { s -> x.test(s.value) }.map { s -> s.copy(name = highlight(s.name, regex, options!!)) }
+
+    }
+
+    fun highlight(name: String, part: String, option: String): String {
+        var res: String = name
+        when (option) {
+            "start" -> res = replaceStart(res, part)
+            "end" -> res = replaceEnd(res, part)
+            "part" -> res = if (isStartWith(name, part)) replaceStart(name,part) else replaceEnd(name,part)
+            "ord" -> res = highlight(res, part.toMutableList())
+        }
+
+        return res
+    }
+
+    private fun replaceStart(name: String, part: String): String {
+        val newPart = part.first().toUpperCase()+part.substring(1)
+        return name.replace(newPart, "<b>$newPart</b>")
+    }
+
+    private fun replaceEnd(name: String, part: String) = name.replace(part,"<b>$part</b>")
+
+    private fun isStartWith(name: String, part: String): Boolean {
+        var res = true
+        for (s in name.toLowerCase().split(" ")) {
+            res = res.and(s.startsWith(part.toLowerCase()))
+        }
+        return res
     }
 
 }

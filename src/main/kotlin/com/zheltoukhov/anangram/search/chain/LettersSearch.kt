@@ -21,23 +21,8 @@ class LettersSearch(val letters: String?): SearchChain() {
             var searchPart: String = street.name.replace(suff,"").replace(Regex("\\(.+\\)"), "")
             val letMass = searchPart.toCharArray().map { c -> Character.toString(c) }.toList()
 
-            var resultStreet = ""
-
-            var searchLetters = letters.toCharArray().toMutableList()
-            for (streetChar in letMass) {
-                var found = false
-                val iter: MutableIterator<Char> = searchLetters.iterator()
-                while (iter.hasNext()) {
-                    val s = iter.next().toString()
-                    if (streetChar.equals(s, true)) {
-                        resultStreet+="<b>$streetChar</b>"
-                        iter.remove()
-                        found = true
-                        break
-                    }
-                }
-                if (!found) resultStreet+=streetChar
-            }
+            var searchLetters = letters.toMutableList()
+            val resultStreet = highlight(searchPart, searchLetters)
 
             if (searchLetters.isEmpty()) {
                 resStreets.add(street.copy(name = resultStreet+suff))

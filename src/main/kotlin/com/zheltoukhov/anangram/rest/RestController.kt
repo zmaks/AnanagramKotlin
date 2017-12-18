@@ -1,6 +1,7 @@
 package com.zheltoukhov.anangram.rest
 
 import com.google.gson.Gson
+import com.zheltoukhov.anangram.dto.StreetDto
 import com.zheltoukhov.anangram.search.StreetSearcher
 import spark.Spark.get
 
@@ -19,6 +20,7 @@ object  RestController {
                                 .lengthPattern(req.queryParams("length") ?: null)
                                 .options(req.queryParams("options") ?: null)
                                 .search()
+                                .map { s -> StreetDto(s.name, s.buildings) }
                 )
             }
 

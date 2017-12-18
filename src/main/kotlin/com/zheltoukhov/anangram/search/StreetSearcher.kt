@@ -36,15 +36,16 @@ class StreetSearcher {
 
     fun search(): List<Street> {
         if (emptyParams(streetPattern, buildingPattern, options, lengthPattern)) return emptyList()
-        var inSearcher: SearchChain? = null
+        val inSearcher: SearchChain?
         if (streetPattern?.toLowerCase()?.matches(Regex("^[а-я]+-?[а-я]*\$"))?:false&&emptyParams(options))
-            inSearcher?.next = LettersSearch(streetPattern)
+            inSearcher = LettersSearch(streetPattern)
         else
-            inSearcher?.next = RegexSearch(streetPattern, options)
+            inSearcher = RegexSearch(streetPattern, options)
         val buildSearch = BuildingSearch(buildingPattern)
         buildSearch.next = LengthPatternSearch(lengthPattern)
-        inSearcher?.next?.next = buildSearch
-        return inSearcher!!.go(DataProvider.findAllStreets())
+        inSearcher.next = buildSearch
+        return inSearcher
+                .go(DataProvider.findAllStreets())
     }
 
     fun emptyParams(vararg params: String?): Boolean {
@@ -52,7 +53,6 @@ class StreetSearcher {
         for(s in params) {
             res = res.and(s==null || s.isEmpty())
         }
-        println(res)
         return res
     }
 }

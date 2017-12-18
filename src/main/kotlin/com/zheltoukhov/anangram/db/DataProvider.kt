@@ -39,7 +39,6 @@ object DataProvider {
             buildings.add(
                     Building(resultSet.getLong(1), resultSet.getString(2))
             )
-           // println("${resultSet.getString(2)} - ${resultSet.getLong(1)}")
         }
 
         return buildings.groupBy({it.streetId},{it.value})
