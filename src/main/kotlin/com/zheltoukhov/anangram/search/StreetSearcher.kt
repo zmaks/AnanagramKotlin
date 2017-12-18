@@ -2,6 +2,7 @@ package com.zheltoukhov.anangram.search
 
 import com.zheltoukhov.anangram.db.DataProvider
 import com.zheltoukhov.anangram.dto.Street
+import com.zheltoukhov.anangram.search.chain.*
 
 /**
  * Created by Maksim on 16.12.2017.
@@ -35,15 +36,15 @@ class StreetSearcher {
 
     fun search(): List<Street> {
         if (emptyParams(streetPattern, buildingPattern, options, lengthPattern)) return emptyList()
-        val inSearcher = InitialSearch()
+        var inSearcher: SearchChain? = null
         if (streetPattern?.toLowerCase()?.matches(Regex("^[а-я]+-?[а-я]*\$"))?:false&&emptyParams(options))
-            inSearcher.next = LettersSearch(streetPattern)
+            inSearcher?.next = LettersSearch(streetPattern)
         else
-            inSearcher.next = RegexSearch(streetPattern, options)
+            inSearcher?.next = RegexSearch(streetPattern, options)
         val buildSearch = BuildingSearch(buildingPattern)
         buildSearch.next = LengthPatternSearch(lengthPattern)
-        inSearcher.next?.next = buildSearch
-        return inSearcher.perform(DataProvider.findAllStreets())
+        inSearcher?.next?.next = buildSearch
+        return inSearcher!!.go(DataProvider.findAllStreets())
     }
 
     fun emptyParams(vararg params: String?): Boolean {
@@ -51,6 +52,7 @@ class StreetSearcher {
         for(s in params) {
             res = res.and(s==null || s.isEmpty())
         }
+        println(res)
         return res
     }
 }

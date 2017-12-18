@@ -13,7 +13,7 @@ object DBConnection {
     private var conn: Connection? = null
     private const val USERNAME = "postgres"
     private const val PASSWORD = "121212"
-    private val url = "jdbc:postgresql://localhost:5432/streets_db"
+    private val url = "jdbc:postgresql://localhost:5433/streets_db"
 
     init {
         val connectionProps = Properties()
