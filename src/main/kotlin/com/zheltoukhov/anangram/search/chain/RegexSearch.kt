@@ -32,7 +32,7 @@ class RegexSearch(val regex: String?, val options: String?): SearchChain() {
             return emptyList()
         }
 
-        return streets.filter { s -> x.test(s.value) }.map { s -> s.copy(name = highlight(s.name, regex, options!!)) }
+        return streets.filter { s -> x.test(s.value) }.map { s -> s.copy(name = highlight(s.name, regex.toLowerCase(), options!!)) }
 
     }
 
