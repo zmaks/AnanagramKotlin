@@ -19,6 +19,7 @@ class LengthPatternSearch(val lengthPattern: String?): SearchChain() {
         var rule: Predicate<Int> = Predicate { _ -> true }
         if (minLength>0) rule = rule.and({ l ->minLength<=l })
         if (maxLength>0) rule = rule.and({ l ->maxLength>=l })
+
         return streets.filter{ s -> rule.test(s.value.length) }
     }
 

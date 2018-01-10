@@ -15,12 +15,11 @@ class LettersSearch(val letters: String?): SearchChain() {
 
         for(street in streets) {
             val mass = street.name.split(" ")
-            var suff = ""
-            if (mass[mass.size-1].contains("Улица")||mass[mass.size-1].contains("Переулок"))
-                suff = mass[mass.size-1]
-            var searchPart: String = street.name.replace(suff,"").replace(Regex("\\(.+\\)"), "")
+            val suff = if (mass[mass.size-1].contains("Улица")||mass[mass.size-1].contains("Переулок"))
+                mass[mass.size-1] else ""
+            val searchPart = street.name.replace(suff,"").replace(Regex("\\(.+\\)"), "")
 
-            var searchLetters = letters.toMutableList()
+            val searchLetters = letters.toMutableList()
             val resultStreet = highlight(searchPart, searchLetters, false)
 
             if (searchLetters.isEmpty()) {

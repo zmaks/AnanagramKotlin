@@ -16,6 +16,6 @@ class BuildingSearch(val building: String?): SearchChain() {
         for (s in streets) {
             s.buildings = buildingsMap.getOrDefault(s.id, emptyList())
         }
-        return streets.filter { s -> !s.buildings.isEmpty() }.toList()
+        return streets.filter { s -> !s.buildings.isEmpty() }
     }
 }

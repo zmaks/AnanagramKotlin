@@ -15,9 +15,8 @@ abstract class SearchChain {
     abstract protected fun perform(streets: List<Street>): List<Street>
 
     protected fun highlight(name: String, searchLetters: MutableList<Char>, ordered: Boolean): String {
-        val letMass = name.toCharArray().toList()
         var resultStreet = ""
-        for (streetChar in letMass) {
+        for (streetChar in name) {
             var found = false
             val iter: MutableIterator<Char> = searchLetters.iterator()
             while (iter.hasNext()) {

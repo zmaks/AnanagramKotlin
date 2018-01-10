@@ -15,10 +15,10 @@ object  RestController {
                 res.type("application/json")
                 Gson().toJson(
                         StreetSearcher()
-                                .streetPattern(req.queryParams("name") ?: null)
-                                .buildingPattern(req.queryParams("building") ?: null)
-                                .lengthPattern(req.queryParams("length") ?: null)
-                                .options(req.queryParams("options") ?: null)
+                                .streetPattern(req.queryParams("name"))
+                                .buildingPattern(req.queryParams("building"))
+                                .lengthPattern(req.queryParams("length"))
+                                .options(req.queryParams("options"))
                                 .search()
                                 .map { s -> StreetDto(s.name, s.buildings) }
                 )
